@@ -1,39 +1,33 @@
 <?php
 session_start();
-// Set nilai default jika sesi kosong
 
 $_SESSION['city'] = isset($_GET['city']) ? $_GET['city'] : ($_SESSION['city'] ?? "Jakarta");
 
 $city =$_SESSION['city'];
-$apiKey = 'QK2S4CHL8XBMTSVPDJVXPVGSY';
-$endpoint = 'https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/'.urlencode($city).'?unitGroup=metric&key=' . $apiKey . '&contentType=json';
+$apiKey = 'e20e0015ecb74e728f9145316253008';
+$endpoint = 'http://api.weatherapi.com/v1/current.json?key=' . $apiKey . '&q=' . urlencode($city) . '&aqi=no';
 
-// Mengambil data cuaca dari API
+
 $response = file_get_contents($endpoint);
 
-// Memastikan permintaan berhasil
 if ($response === false) {
     die('Gagal mengambil data cuaca');
 }
 
-// Menguraikan respons JSON                                                                                                                 
 
 $data = json_decode($response, true);
 
-// Memeriksa apakah ada kesalahan dalam respons
 if (isset($data['errorCode'])) {
     die('Terjadi kesalahan: ' . $data['errorCode'] . ' - ' . $data['message']);
 }
+$currentWeather = $data['current'];
 
-// Mengambil data cuaca hari ini
-$todayWeather = $data['days'][0];
+$temp = $currentWeather['temp_c']; // suhu dalam Celcius
+$humidity = $currentWeather['humidity'];
+$windspeed = $currentWeather['wind_kph']; // kecepatan angin km/h
+$conditions = $currentWeather['condition']['text'];
+$icon = $currentWeather['condition']['icon'];
 
-// Mendapatkan informasi cuaca
-$temp = $todayWeather['temp'];
-$humidity = $todayWeather['humidity'];
-$windspeed = $todayWeather['windspeed'];
-$conditions = $todayWeather['conditions'];
-$icon = $todayWeather['icon'];
 ?>
 
 <!DOCTYPE html>
@@ -249,7 +243,7 @@ figcaption span:nth-child(2){
 </div>
 <div class="box-main">
  <div class="box-weather">
- <img src="/<?php echo $icon; ?>.svg" alt="<?php echo $icon; ?>">
+<img src="https:<?php echo $icon; ?>" alt="Cuaca">
    <p><?php echo $temp; ?><sup> &#176;C</sup></p>
    <p><?php echo $conditions ?></p>
  </div>
@@ -280,18 +274,13 @@ figcaption span:nth-child(2){
 <script>
 var dropbtn = document.querySelector(".dropbtn");
 
-    // Memilih elemen dropdown-content berdasarkan class
     var dropdownContent = document.querySelector(".dropdown-content");
 
-    // Menambahkan event listener untuk mengatur fungsi toggle saat dropbtn diklik
     dropbtn.addEventListener("click", function() {
-      // Toggle class "open" pada dropbtn
       dropbtn.classList.toggle("open");
 
-      // Memeriksa apakah dropdown-content sedang ditampilkan atau tidak
       var isDropdownVisible = dropbtn.classList.contains("open");
 
-      // Mengubah opacity dan pointer-events pada dropdown-content sesuai dengan keadaan
       dropdownContent.style.opacity = isDropdownVisible ? 1 : 0;
       dropdownContent.style.pointerEvents = isDropdownVisible ? "auto" : "none";
     });
