@@ -1,32 +1,64 @@
 <?php
 session_start();
 
-$_SESSION['city'] = isset($_GET['city']) ? $_GET['city'] : ($_SESSION['city'] ?? "Jakarta");
+// Ambil nama kota dari URL (?city=...) atau session, default "Jakarta"
+$_SESSION['city'] = isset($_GET['city']) ? $_GET['city'] : ($_SESSION['city'] ?? 'Jakarta');
+$city = $_SESSION['city'];
 
-$city =$_SESSION['city'];
-$apiKey = 'e20e0015ecb74e728f9145316253008';
-$endpoint = 'http://api.weatherapi.com/v1/current.json?key=' . $apiKey . '&q=' . urlencode($city) . '&aqi=no';
+// 1. Ambil koordinat kota (lat/lon) dari Open-Meteo Geocoding API
+$geo_url = "https://geocoding-api.open-meteo.com/v1/search?name=" . urlencode($city) . "&count=1";
+$geo_response = file_get_contents($geo_url);
 
+if ($geo_response === false) {
+    die('Gagal mengambil data lokasi');
+}
 
-$response = file_get_contents($endpoint);
+$geo_data = json_decode($geo_response, true);
 
-if ($response === false) {
+if (!isset($geo_data['results'][0])) {
+    die("Kota tidak ditemukan");
+}
+
+$lat = $geo_data['results'][0]['latitude'];
+$lon = $geo_data['results'][0]['longitude'];
+
+// 2. Ambil data cuaca saat ini dari Open-Meteo
+$weather_url = "https://api.open-meteo.com/v1/forecast?latitude={$lat}&longitude={$lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code";
+$weather_response = file_get_contents($weather_url);
+
+if ($weather_response === false) {
     die('Gagal mengambil data cuaca');
 }
 
+$data = json_decode($weather_response, true);
 
-$data = json_decode($response, true);
-
-if (isset($data['errorCode'])) {
-    die('Terjadi kesalahan: ' . $data['errorCode'] . ' - ' . $data['message']);
+if (!isset($data['current'])) {
+    die("Data cuaca tidak ditemukan");
 }
+
 $currentWeather = $data['current'];
 
-$temp = $currentWeather['temp_c']; // suhu dalam Celcius
-$humidity = $currentWeather['humidity'];
-$windspeed = $currentWeather['wind_kph']; // kecepatan angin km/h
-$conditions = $currentWeather['condition']['text'];
-$icon = $currentWeather['condition']['icon'];
+// Ambil data penting
+$temp = $currentWeather['temperature_2m'];           // Suhu (°C)
+$humidity = $currentWeather['relative_humidity_2m']; // Kelembapan (%)
+$windspeed = $currentWeather['wind_speed_10m'];      // Angin (km/h)
+$weatherCode = $currentWeather['weather_code'];      // Kode cuaca
+$time = $currentWeather['time'];
+
+// Mapping sederhana untuk icon
+$iconMap = [
+    0 => "clear-day",
+    1 => "mainly-clear",
+    2 => "partly-cloudy",
+    3 => "cloudy",
+    45 => "fog",
+    48 => "fog",
+    51 => "rain",
+    61 => "rain",
+    71 => "snow",
+    95 => "thunder"
+];
+$condition = isset($iconMap[$weatherCode]) ? $iconMap[$weatherCode] : "default.svg";
 
 ?>
 
@@ -236,16 +268,16 @@ figcaption span:nth-child(2){
      <div class="dropdown-content">
       <form action="#" method="get">  
        <label for="city"></label>
-       <input type="text" id="city" name="city" value="jakarta" placeholder="city..">
+       <input onclick="updateCity()" type="text" id="city" name="city" value="<?php echo $city; ?>" placeholder="city..">
 </form>
      </div>
  </div>
 </div>
 <div class="box-main">
  <div class="box-weather">
-<img src="https:<?php echo $icon; ?>" alt="Cuaca">
+<img src="<?php echo $condition; ?>.svg" alt="Cuaca">
    <p><?php echo $temp; ?><sup> &#176;C</sup></p>
-   <p><?php echo $conditions ?></p>
+   <p><?php echo $condition; ?></p>
  </div>
 </div>
 <div class="box-bottom" >
@@ -284,6 +316,21 @@ var dropbtn = document.querySelector(".dropbtn");
       dropdownContent.style.opacity = isDropdownVisible ? 1 : 0;
       dropdownContent.style.pointerEvents = isDropdownVisible ? "auto" : "none";
     });
+function updateCity() {
+      const city = document.getElementById('city').value;
+      fetch("", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({city})
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.status === 'ok') {
+          document.getElementById('currentCity').textContent = city;
+          alert("Kota diperbarui ke: " + city);
+        }
+      });
+    }
 
 </script>
 </body>
