@@ -51,6 +51,7 @@ $iconMap = [
     1 => "mainly-clear",
     2 => "partly-cloudy",
     3 => "cloudy",
+    80 => "cloudy",
     45 => "fog",
     48 => "fog",
     51 => "rain",
@@ -58,7 +59,7 @@ $iconMap = [
     71 => "snow",
     95 => "thunder"
 ];
-$condition = isset($iconMap[$weatherCode]) ? $iconMap[$weatherCode] : "default.svg";
+$condition = $iconMap[$weatherCode];
 
 ?>
 
