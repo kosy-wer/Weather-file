@@ -5,7 +5,7 @@
     }
   },
   "routes": [
-    { "src": "/(.*\\.svg)", "dest": "/public/$1" },
+    { "src": "/(.*\\.(svg|png|jpg|jpeg|gif|css|js))", "dest": "/public/$1" },
     { "src": "/(.*)", "dest": "api/index.php" }
   ]
 }
