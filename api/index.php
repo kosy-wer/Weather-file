@@ -193,10 +193,10 @@ button > img {
       position: absolute;
       box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
       transform: translateY(-100%);
-      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      transition: transform 0.3s ease-in-out, opacity 0.8s ease-in-out;
       opacity: 0;
       pointer-events: none;
-      z-index:5;
+      z-index:1;
       display: flex;
       justify-content: center;      /* Horizontal center */
       align-items: center;          /* Vertikal center */
@@ -216,6 +216,7 @@ form{
       opacity: 1;
       pointer-events: auto;
       z-index:1;      
+      transition: transform 0.3s ease-in-out, opacity 0.8s ease-in-out;
     }
 .dropdown-content input {
     height:20%;
