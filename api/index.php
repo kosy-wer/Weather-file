@@ -265,10 +265,10 @@ figcaption span:nth-child(2){
   <div class="box-top">
     <div class="search-container">
       <div id="search-input">
-        <img src="../public/location.svg" alt="">
+        <img src="location.svg" alt="">
       </div>
       <button class="dropbtn">
-        <img src="../public/search.png" alt="icon search">
+        <img src="search.png" alt="icon search">
       </button>
       <div class="dropdown-content">
         <form action="#" method="get">
