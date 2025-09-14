@@ -1,18 +1,15 @@
 <?php
 session_start();
 
-// Ambil nama kota dari URL atau session, default Jakarta
 $city = $_GET['city'] ?? $_SESSION['city'] ?? 'Jakarta';
 $_SESSION['city'] = $city;
 
-// Variabel default supaya halaman tetap render
 $temp = "-";
 $humidity = "-";
 $windspeed = "-";
 $condition = "unknown";
 $errorMessage = null;
 
-// 1. Ambil koordinat kota
 $geo_url = "https://geocoding-api.open-meteo.com/v1/search?name=" . urlencode($city) . "&count=1";
 $geo_response = @file_get_contents($geo_url);
 
